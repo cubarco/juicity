@@ -1,0 +1,6 @@
+[submodule "softwind"]
+	path = softwind
+	url = https://github.com/cubarco/softwind.git
+[submodule "quic-go"]
+	path = quic-go
+	url = https://github.com/cubarco/quic-go.git

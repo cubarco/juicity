@@ -59,6 +59,6 @@ require (
 
 replace github.com/nadoo/glider => github.com/juicity/glider v0.0.0-20230805143717-947042416fa6
 
-// replace github.com/daeuniverse/softwind => ../softwind
+replace github.com/daeuniverse/softwind => ./softwind
 
 // replace github.com/mzz2017/quic-go => ../quic-go

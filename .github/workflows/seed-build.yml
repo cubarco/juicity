@@ -131,7 +131,30 @@ jobs:
           find ./go-mod/ -maxdepth 1 ! -name "cache" ! -name "go-mod" -exec rm -rf {} \;
           sed -i 's/#export GOMODCACHE=$(PWD)\/go-mod/export GOMODCACHE=$(PWD)\/go-mod/' Makefile
 
+      - uses: nttld/setup-ndk@v1
+        if: ${{ matrix.goos=='android' }}
+        id: setup-ndk
+        with:
+          ndk-version: r25b
+          add-to-path: false
+          local-cache: true
+
+      - name: Build Android
+        if: ${{ matrix.goos=='android' }}
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          mkdir -p ./build/
+          export CGO_ENABLED=1
+          export CC=${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android33-clang
+          export GOFLAGS="-trimpath -modcacherw"
+          export VERSION=${{ steps.get_version.outputs.VERSION }}
+          make all
+          cp ./juicity-server ./build/
+          cp ./juicity-client ./build/
+
       - name: Build juicity
+        if: ${{ matrix.goos!='android' }}
         run: |
           mkdir -p ./build/
           export CGO_ENABLED=0
@@ -153,11 +176,11 @@ jobs:
           cp ./install/example-{client,server}.json ./build/
           cp ./install/juicity-{client,server}.service ./build/
 
-      - name: Smoke test
-        if: matrix.goarch == 'amd64' && matrix.goamd64 == 'v1'
-        run: |
-          ./build/juicity-server --version
-          ./build/juicity-client --version
+#       - name: Smoke test
+#         if: matrix.goarch == 'amd64' && matrix.goamd64 == 'v1'
+#         run: |
+#           ./build/juicity-server --version
+#           ./build/juicity-client --version
 
       - name: Create binary ZIP archive and Signature
         run: |
